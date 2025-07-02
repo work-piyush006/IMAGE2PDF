@@ -1,10 +1,16 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
-from fpdf import FPDF
 import os
 import time
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    CallbackQueryHandler,
+    MessageHandler,
+    ContextTypes,
+    filters,
+)
+from fpdf import FPDF
 
-# --- CONFIG ---
 BOT_TOKEN = "7693918135:AAGO-4A2lCRMaDnpmItkOY94w1f16_D0iSw"
 UPI_ID = "work.piyush006@fam"
 QR_IMAGE_PATH = "Qr.png"
@@ -14,13 +20,11 @@ IMAGE_LIMIT = 7
 PDF_LIMIT = 7
 ADMIN_USERNAME = "Image2pdfadmin"
 
-# --- Runtime Data ---
 PREMIUM_USERS = set()
 USER_IMAGES = {}
 USER_USAGE = {}
 LAST_REQUEST_TIME = {}
 
-# --- Load Premium Users ---
 if os.path.exists(PREMIUM_FILE):
     with open(PREMIUM_FILE, 'r') as f:
         for line in f:
@@ -29,7 +33,6 @@ if os.path.exists(PREMIUM_FILE):
             except:
                 continue
 
-# --- PDF Generator ---
 def create_pdf(images, filename):
     pdf = FPDF()
     for img in images:
@@ -37,11 +40,9 @@ def create_pdf(images, filename):
         pdf.image(img, x=10, y=10, w=190)
     pdf.output(filename)
 
-# --- Helper ---
 def is_premium(user_id):
     return user_id in PREMIUM_USERS
 
-# --- START COMMAND ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     USER_USAGE.setdefault(user_id, {'images_used': 0, 'pdfs_generated': 0})
@@ -57,8 +58,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if is_premium(user_id):
         await update.message.reply_text(
-            "🎉 You're a *PREMIUM* member!\n\n"
-            "✅ You have access to *unlimited services*.\n\n"
+            "Welcome back !!\n🎉 You're now a *PREMIUM* member!\n\n"
+            "✅ You have access to *unlimited uses of our service*.\n\n"
             "👇 Choose an option:",
             parse_mode='Markdown',
             reply_markup=reply_markup
@@ -79,14 +80,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text(
             "👋 *Welcome to Image2PDFMaster!*\n\n"
-            "📷 Free users: *7 images* & *7 PDFs* max.\n"
-            "✨ Premium = *unlimited access*.\n\n"
+            "📷 Free users can send up to *7 images* and create *7 PDFs*.\n"
+            "✨ Upgrade to Premium for *unlimited access*.\n\n"
             f"🆔 Your User ID: `{user_id}`",
             parse_mode='Markdown',
             reply_markup=reply_markup
         )
 
-# --- BUTTON HANDLER ---
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -96,7 +96,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     USER_IMAGES.setdefault(user_id, [])
 
     if query.data == 'send':
-        await query.edit_message_text("📤 Send your images now.")
+        await query.edit_message_text("📤 Send or drop your images now.")
 
     elif query.data == 'convert':
         await convert_from_button(query, context)
@@ -148,7 +148,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode='Markdown'
             )
 
-# --- CONVERT TO PDF ---
 async def convert_from_button(update_or_query, context: ContextTypes.DEFAULT_TYPE):
     if isinstance(update_or_query, Update):
         user_id = update_or_query.message.from_user.id
@@ -185,7 +184,6 @@ async def convert_from_button(update_or_query, context: ContextTypes.DEFAULT_TYP
         text=f"✅ PDF created!\nUsed: {USER_USAGE[user_id]['pdfs_generated']} of {PDF_LIMIT}."
     )
 
-# --- IMAGE HANDLER ---
 async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     USER_IMAGES.setdefault(user_id, [])
@@ -203,15 +201,14 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_premium(user_id):
         USER_USAGE[user_id]['images_used'] += 1
 
-    await update.message.reply_text("🖼 Image saved!")
+    await update.message.reply_text(f"🖼 Image saved!")
 
-# --- ERROR HANDLER ---
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     print(f"⚠️ Error: {context.error}")
 
-# --- RUN THE BOT ---
 if __name__ == "__main__":
     app = ApplicationBuilder().token(BOT_TOKEN).build()
+
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
