@@ -5,7 +5,7 @@ import os
 import time
 
 # --- CONFIG ---
-BOT_TOKEN = "YOUR_BOT_TOKEN"
+BOT_TOKEN = "7693918135:AAGO-4A2lCRMaDnpmItkOY94w1f16_D0iSw"
 UPI_ID = "work.piyush006@fam"
 QR_IMAGE_PATH = "Qr.png"
 PREMIUM_FILE = "user_premium.txt"
