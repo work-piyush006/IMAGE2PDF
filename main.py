@@ -5,7 +5,7 @@ import os
 import time
 
 # --- CONFIG ---
-BOT_TOKEN = "7693918135:AAGO-4A2lCRMaDnpmItkOY94w1f16_D0iSw"
+BOT_TOKEN = "YOUR_BOT_TOKEN"
 UPI_ID = "work.piyush006@fam"
 QR_IMAGE_PATH = "Qr.png"
 PREMIUM_FILE = "user_premium.txt"
@@ -57,7 +57,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if is_premium(user_id):
         await update.message.reply_text(
-            "🎉 You're a *PREMIUM* user!\n\n👇 Choose an option:",
+            "🎉 You're a *PREMIUM* member!\n\n"
+            "✅ You have access to *unlimited services*.\n\n"
+            "👇 Choose an option:",
             parse_mode='Markdown',
             reply_markup=reply_markup
         )
@@ -67,7 +69,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if now - last > 43200:
             LAST_REQUEST_TIME[user_id] = now
             await update.message.reply_text(
-                f"⏰ *Reminder*: Pay ₹29 to `{UPI_ID}` and send screenshot with your ID: `{user_id}` to admin.",
+                f"⏰ *Reminder*: You haven't completed the payment.\n"
+                f"Pay ₹29 to `{UPI_ID}` and send screenshot with your ID: `{user_id}` to admin.",
                 parse_mode='Markdown',
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("📤 Send to Admin", url=f"https://t.me/{ADMIN_USERNAME}")]
@@ -75,10 +78,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
         await update.message.reply_text(
-            "👋 Welcome to Image2PDF Bot!\n\n"
-            "📷 Free users: *7 images* & *7 PDFs* limit.\n"
-            "✨ Premium: Unlimited access.\n\n"
-            f"🆔 Your ID: `{user_id}`",
+            "👋 *Welcome to Image2PDFMaster!*\n\n"
+            "📷 Free users: *7 images* & *7 PDFs* max.\n"
+            "✨ Premium = *unlimited access*.\n\n"
+            f"🆔 Your User ID: `{user_id}`",
             parse_mode='Markdown',
             reply_markup=reply_markup
         )
@@ -200,16 +203,15 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_premium(user_id):
         USER_USAGE[user_id]['images_used'] += 1
 
-    await update.message.reply_text(f"🖼 Image saved!")
+    await update.message.reply_text("🖼 Image saved!")
 
 # --- ERROR HANDLER ---
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     print(f"⚠️ Error: {context.error}")
 
-# --- MAIN ---
+# --- RUN THE BOT ---
 if __name__ == "__main__":
     app = ApplicationBuilder().token(BOT_TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
